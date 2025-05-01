@@ -1,0 +1,12 @@
+_target_: src.data.datamodule.DataModule
+dataset: mwz2.4
+train_batch_size: 64
+eval_batch_size: 64
+num_workers: 27
+all_vocab: 1
+data_ratio: 100
+only_domain: ""
+except_domain: ""
+fisher_sample: 0
+save_dir: "logs/"
+imbalance_sampler: False

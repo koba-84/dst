@@ -1,0 +1,603 @@
+"{'task_name': 'train', 'tags': ['dev'], 'precision': 'high', 'train': True, 'val': True, 'test': False, 'ckpt_path': None, 'seed': None, 'data': {'_target_': 'src.data.datamodule.DataModule', 'dataset': 'mwz2.4', 'train_batch_size': 128, 'eval_batch_size': 128, 'num_workers': 27, 'all_vocab': 1, 'data_ratio': 100, 'only_domain': '', 'except_domain': '', 'fisher_sample': 0, 'save_dir': 'logs/', 'imbalance_sampler': False}, 'model': {'_target_': 'src.models.module.BaseModel', 'model': {'_target_': 'src.models.components.simple.TRADE', 'hidden_size': 128, 'lang': '???', 'path': False, 'dropout': 0.1, 'slots': '???', 'genSample': False, 'unk_mask': True, 'teacher_forcing_ratio': 0.5, 'use_gate': True, 'nb_train_vocab': 0, 'load_emb': False, 'fix_emb': False, 'parallel_decode': True}, 'optimizer': {'_target_': 'torch.optim.Adam', '_partial_': True, 'lr': 0.001}, 'scheduler': {'_target_': 'torch.optim.lr_scheduler.ReduceLROnPlateau', '_partial_': True, 'mode': 'min'}, 'compile': False}, 'callbacks': {'model_checkpoint': {'_target_': 'lightning.pytorch.callbacks.ModelCheckpoint', 'dirpath': '${paths.output_dir}/checkpoints', 'filename': 'epoch_{epoch:03d}', 'monitor': 'val/acc', 'verbose': False, 'save_last': True, 'save_top_k': 1, 'mode': 'max', 'auto_insert_metric_name': False, 'save_weights_only': False, 'every_n_train_steps': None, 'train_time_interval': None, 'every_n_epochs': None, 'save_on_train_epoch_end': None}, 'early_stopping': {'_target_': 'lightning.pytorch.callbacks.EarlyStopping', 'monitor': 'val/acc', 'min_delta': 0.0, 'patience': 100, 'verbose': False, 'mode': 'max', 'strict': True, 'check_finite': True, 'stopping_threshold': None, 'divergence_threshold': None, 'check_on_train_epoch_end': None}, 'model_summary': {'_target_': 'lightning.pytorch.callbacks.RichModelSummary', 'max_depth': -1}, 'rich_progress_bar': {'_target_': 'lightning.pytorch.callbacks.RichProgressBar'}}, 'logger': {'tensorboard': {'_target_': 'lightning.pytorch.loggers.tensorboard.TensorBoardLogger', 'save_dir': '${paths.output_dir}/tensorboard/', 'name': None, 'log_graph': False, 'default_hp_metric': True, 'prefix': ''}}, 'trainer': {'_target_': 'lightning.pytorch.trainer.Trainer', 'default_root_dir': '${paths.output_dir}', 'min_epochs': 1, 'max_epochs': 10, 'accelerator': 'gpu', 'devices': 1, 'check_val_every_n_epoch': 1, 'deterministic': False}, 'paths': {'root_dir': '${oc.env:PROJECT_ROOT}', 'data_dir': '${paths.root_dir}/data/', 'log_dir': '${paths.root_dir}/logs/', 'output_dir': '${hydra:runtime.output_dir}', 'work_dir': '${hydra:runtime.cwd}'}, 'extras': {'ignore_warnings': False, 'enforce_tags': True, 'print_config': True}}"
+[[36m2025-04-10 23:30:41,568[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating datamodule <src.data.datamodule.DataModule>[0m
+folder_name logs/logs/
+Reading from data/mwz2.4/train_dials.json
+domain_counter {'hotel': 3381, 'train': 3103, 'attraction': 2717, 'restaurant': 3813, 'taxi': 1654}
+Reading from data/mwz2.4/val_dials.json
+domain_counter {'hotel': 416, 'train': 484, 'attraction': 401, 'restaurant': 438, 'taxi': 207}
+Reading from data/mwz2.4/test_dials.json
+domain_counter {'taxi': 195, 'attraction': 395, 'restaurant': 437, 'train': 494, 'hotel': 394}
+[Info] Dumping lang files...
+Read 56668 pairs train
+Read 7374 pairs val
+Read 7368 pairs test
+Vocab_size: 18275 
+Vocab_size Training 15434
+Vocab_size Belief 1093
+Max. length of dialog words for RNN: 885 
+USE_CUDA=True
+[Train Set Val Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+[Test Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+[[36m2025-04-10 23:30:47,186[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating model <src.models.module.BaseModel>[0m
+/home/kobayashi/dst/.venv/lib/python3.11/site-packages/torch/nn/modules/rnn.py:123: UserWarning: dropout option adds dropout after all but last recurrent layer, so non-zero dropout expects num_layers greater than 1, but got dropout=0.1 and num_layers=1
+  warnings.warn(
+/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/utilities/parsing.py:209: Attribute 'model' is an instance of `nn.Module` and is already saved during checkpointing. It is recommended to ignore them using `self.save_hyperparameters(ignore=['model'])`.
+---------------------
+[<src.data.components.dataset.Lang object at 0x7485c2a0e250>, <src.data.components.dataset.Lang object at 0x7485c2a0e2d0>]
+[['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']]
+---------------------
+{'_target_': 'src.models.module.BaseModel', 'model': {'_target_': 'src.models.components.simple.TRADE', 'hidden_size': 128, 'lang': [<src.data.components.dataset.Lang object at 0x7485c2a0e250>, <src.data.components.dataset.Lang object at 0x7485c2a0e2d0>], 'path': False, 'dropout': 0.1, 'slots': [['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']], 'genSample': False, 'unk_mask': True, 'teacher_forcing_ratio': 0.5, 'use_gate': True, 'nb_train_vocab': 0, 'load_emb': False, 'fix_emb': False, 'parallel_decode': True}, 'optimizer': {'_target_': 'torch.optim.Adam', '_partial_': True, 'lr': 0.001}, 'scheduler': {'_target_': 'torch.optim.lr_scheduler.ReduceLROnPlateau', '_partial_': True, 'mode': 'min'}, 'compile': False}
+[[36m2025-04-10 23:30:47,250[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating callbacks...[0m
+[[36m2025-04-10 23:30:47,250[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating callback <lightning.pytorch.callbacks.ModelCheckpoint>[0m
+[[36m2025-04-10 23:30:47,254[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating callback <lightning.pytorch.callbacks.EarlyStopping>[0m
+[[36m2025-04-10 23:30:47,255[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating callback <lightning.pytorch.callbacks.RichModelSummary>[0m
+[[36m2025-04-10 23:30:47,255[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating callback <lightning.pytorch.callbacks.RichProgressBar>[0m
+[[36m2025-04-10 23:30:47,255[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating loggers...[0m
+[[36m2025-04-10 23:30:47,255[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating logger <lightning.pytorch.loggers.tensorboard.TensorBoardLogger>[0m
+[[36m2025-04-10 23:30:47,261[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating trainer <lightning.pytorch.trainer.Trainer>[0m
+Trainer already configured with model summary callbacks: [<class 'lightning.pytorch.callbacks.rich_model_summary.RichModelSummary'>]. Skipping setting a default `ModelSummary` callback.
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+HPU available: False, using: 0 HPUs
+[[36m2025-04-10 23:30:47,268[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Logging hyperparameters![0m
+[[36m2025-04-10 23:30:47,295[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Starting training![0m
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
+folder_name logs/logs/
+Reading from data/mwz2.4/train_dials.json
+domain_counter {'hotel': 3381, 'train': 3103, 'attraction': 2717, 'restaurant': 3813, 'taxi': 1654}
+Reading from data/mwz2.4/val_dials.json
+domain_counter {'hotel': 416, 'train': 484, 'attraction': 401, 'restaurant': 438, 'taxi': 207}
+Reading from data/mwz2.4/test_dials.json
+domain_counter {'taxi': 195, 'attraction': 395, 'restaurant': 437, 'train': 494, 'hotel': 394}
+[Info] Dumping lang files...
+Read 56668 pairs train
+Read 7374 pairs val
+Read 7368 pairs test
+Vocab_size: 18275 
+Vocab_size Training 15434
+Vocab_size Belief 1093
+Max. length of dialog words for RNN: 885 
+USE_CUDA=True
+[Train Set Val Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+[Test Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┓
+┃    ┃ Name                        ┃ Type             ┃ Params ┃ Mode  ┃
+┡━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━┩
+│ 0  │ model                       │ TRADE            │  2.6 M │ train │
+│ 1  │ model.cross_entorpy         │ CrossEntropyLoss │      0 │ train │
+│ 2  │ model.encoder               │ EncoderRNN       │  2.5 M │ train │
+│ 3  │ model.encoder.dropout_layer │ Dropout          │      0 │ train │
+│ 4  │ model.encoder.embedding     │ Embedding        │  2.3 M │ train │
+│ 5  │ model.encoder.gru           │ GRU              │  198 K │ train │
+│ 6  │ model.decoder               │ Generator        │  2.4 M │ train │
+│ 7  │ model.decoder.dropout_layer │ Dropout          │      0 │ train │
+│ 8  │ model.decoder.gru           │ GRU              │ 99.1 K │ train │
+│ 9  │ model.decoder.W_ratio       │ Linear           │    385 │ train │
+│ 10 │ model.decoder.softmax       │ Softmax          │      0 │ train │
+│ 11 │ model.decoder.sigmoid       │ Sigmoid          │      0 │ train │
+│ 12 │ model.decoder.W_gate        │ Linear           │    387 │ train │
+│ 13 │ model.decoder.Slot_emb      │ Embedding        │  2.8 K │ train │
+│ 14 │ train_loss                  │ SumMetric        │      0 │ train │
+│ 15 │ val_loss                    │ SumMetric        │      0 │ train │
+│ 16 │ test_loss                   │ SumMetric        │      0 │ train │
+└────┴─────────────────────────────┴──────────────────┴────────┴───────┘
+Trainable params: 2.6 M                                                         
+Non-trainable params: 0                                                         
+Total params: 2.6 M                                                             
+Total estimated model params size (MB): 10                                      
+Modules in train mode: 17                                                       
+Modules in eval mode: 0                                                         
+Epoch 0/9  ━━━━━━━━━━━━━━━━ 443/443 0:43:28 • 0:00:00 0.17it/s v_num: 0.000     
+                                                               val/loss: 41.432 
+                                                               train/loss:      
+                                                               601.799          
+[[36m2025-04-11 00:18:14,340[0m][[34msrc.utils.utils[0m][[31mERROR[0m] - [rank: 0] [0m
+Traceback (most recent call last):
+  File "/home/kobayashi/dst/src/utils/utils.py", line 71, in wrap
+    metric_dict, object_dict = task_func(cfg=cfg)
+                               ^^^^^^^^^^^^^^^^^^
+  File "/home/kobayashi/dst/src/train.py", line 100, in train
+    trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 561, in fit
+    call._call_and_handle_interrupt(
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/call.py", line 48, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 599, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 1012, in _run
+    results = self._run_stage()
+              ^^^^^^^^^^^^^^^^^
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 1056, in _run_stage
+    self.fit_loop.run()
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/loops/fit_loop.py", line 217, in run
+    self.on_advance_end()
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/loops/fit_loop.py", line 470, in on_advance_end
+    call._call_callback_hooks(trainer, "on_train_epoch_end", monitoring_callbacks=True)
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/call.py", line 227, in _call_callback_hooks
+    fn(trainer, trainer.lightning_module, *args, **kwargs)
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/callbacks/early_stopping.py", line 190, in on_train_epoch_end
+    self._run_early_stopping_check(trainer)
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/callbacks/early_stopping.py", line 202, in _run_early_stopping_check
+    if trainer.fast_dev_run or not self._validate_condition_metric(  # disable early_stopping with fast_dev_run
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/callbacks/early_stopping.py", line 153, in _validate_condition_metric
+    raise RuntimeError(error_msg)
+RuntimeError: Early stopping conditioned on metric `val/acc` which is not available. Pass in or modify your `EarlyStopping` callback to use any of the following: `val/loss`, `train/loss`
+[[36m2025-04-11 00:18:14,342[0m][[34msrc.utils.utils[0m][[32mINFO[0m] - [rank: 0] Output dir: /home/kobayashi/dst/logs/train/runs/2025-04-10_23-30-41[0m
+Error executing job with overrides: []
+Traceback (most recent call last):
+  File "/home/kobayashi/dst/src/train.py", line 136, in main
+    metric_dict, _ = train(cfg)
+                     ^^^^^^^^^^
+  File "/home/kobayashi/dst/src/utils/utils.py", line 81, in wrap
+    raise ex
+  File "/home/kobayashi/dst/src/utils/utils.py", line 71, in wrap
+    metric_dict, object_dict = task_func(cfg=cfg)
+                               ^^^^^^^^^^^^^^^^^^
+  File "/home/kobayashi/dst/src/train.py", line 100, in train
+    trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 561, in fit
+    call._call_and_handle_interrupt(
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/call.py", line 48, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 599, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 1012, in _run
+    results = self._run_stage()
+              ^^^^^^^^^^^^^^^^^
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/trainer.py", line 1056, in _run_stage
+    self.fit_loop.run()
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/loops/fit_loop.py", line 217, in run
+    self.on_advance_end()
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/loops/fit_loop.py", line 470, in on_advance_end
+    call._call_callback_hooks(trainer, "on_train_epoch_end", monitoring_callbacks=True)
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/trainer/call.py", line 227, in _call_callback_hooks
+    fn(trainer, trainer.lightning_module, *args, **kwargs)
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/callbacks/early_stopping.py", line 190, in on_train_epoch_end
+    self._run_early_stopping_check(trainer)
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/callbacks/early_stopping.py", line 202, in _run_early_stopping_check
+    if trainer.fast_dev_run or not self._validate_condition_metric(  # disable early_stopping with fast_dev_run
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/callbacks/early_stopping.py", line 153, in _validate_condition_metric
+    raise RuntimeError(error_msg)
+RuntimeError: Early stopping conditioned on metric `val/acc` which is not available. Pass in or modify your `EarlyStopping` callback to use any of the following: `val/loss`, `train/loss`
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+"{'task_name': 'train', 'tags': ['dev'], 'precision': 'high', 'train': True, 'val': True, 'test': False, 'ckpt_path': None, 'seed': None, 'data': {'_target_': 'src.data.datamodule.DataModule', 'dataset': 'mwz2.4', 'train_batch_size': 128, 'eval_batch_size': 128, 'num_workers': 27, 'all_vocab': 1, 'data_ratio': 100, 'only_domain': '', 'except_domain': '', 'fisher_sample': 0, 'save_dir': 'logs/', 'imbalance_sampler': False}, 'model': {'_target_': 'src.models.module.BaseModel', 'model': {'_target_': 'src.models.components.simple.TRADE', 'hidden_size': 128, 'lang': '???', 'path': False, 'dropout': 0.1, 'slots': '???', 'genSample': False, 'unk_mask': True, 'teacher_forcing_ratio': 0.5, 'use_gate': True, 'nb_train_vocab': 0, 'load_emb': False, 'fix_emb': False, 'parallel_decode': True}, 'optimizer': {'_target_': 'torch.optim.Adam', '_partial_': True, 'lr': 0.001}, 'scheduler': {'_target_': 'torch.optim.lr_scheduler.ReduceLROnPlateau', '_partial_': True, 'mode': 'min'}, 'compile': False}, 'callbacks': {'model_checkpoint': {'_target_': 'lightning.pytorch.callbacks.ModelCheckpoint', 'dirpath': '${paths.output_dir}/checkpoints', 'filename': 'epoch_{epoch:03d}', 'monitor': 'val/loss', 'verbose': False, 'save_last': True, 'save_top_k': 1, 'mode': 'min', 'auto_insert_metric_name': False, 'save_weights_only': False, 'every_n_train_steps': None, 'train_time_interval': None, 'every_n_epochs': None, 'save_on_train_epoch_end': None}, 'early_stopping': {'_target_': 'lightning.pytorch.callbacks.EarlyStopping', 'monitor': 'val/loss', 'min_delta': 0.0, 'patience': 100, 'verbose': False, 'mode': 'min', 'strict': True, 'check_finite': True, 'stopping_threshold': None, 'divergence_threshold': None, 'check_on_train_epoch_end': None}, 'model_summary': {'_target_': 'lightning.pytorch.callbacks.RichModelSummary', 'max_depth': -1}, 'rich_progress_bar': {'_target_': 'lightning.pytorch.callbacks.RichProgressBar'}}, 'logger': {'tensorboard': {'_target_': 'lightning.pytorch.loggers.tensorboard.TensorBoardLogger', 'save_dir': '${paths.output_dir}/tensorboard/', 'name': None, 'log_graph': False, 'default_hp_metric': True, 'prefix': ''}}, 'trainer': {'_target_': 'lightning.pytorch.trainer.Trainer', 'default_root_dir': '${paths.output_dir}', 'min_epochs': 1, 'max_epochs': 10, 'accelerator': 'gpu', 'devices': 1, 'check_val_every_n_epoch': 1, 'deterministic': False}, 'paths': {'root_dir': '${oc.env:PROJECT_ROOT}', 'data_dir': '${paths.root_dir}/data/', 'log_dir': '${paths.root_dir}/logs/', 'output_dir': '${hydra:runtime.output_dir}', 'work_dir': '${hydra:runtime.cwd}'}, 'extras': {'ignore_warnings': False, 'enforce_tags': True, 'print_config': True}}"
+[[36m2025-04-11 07:21:19,712[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating datamodule <src.data.datamodule.DataModule>[0m
+folder_name logs/logs/
+Reading from data/mwz2.4/train_dials.json
+domain_counter {'hotel': 3381, 'train': 3103, 'attraction': 2717, 'restaurant': 3813, 'taxi': 1654}
+Reading from data/mwz2.4/val_dials.json
+domain_counter {'hotel': 416, 'train': 484, 'attraction': 401, 'restaurant': 438, 'taxi': 207}
+Reading from data/mwz2.4/test_dials.json
+domain_counter {'taxi': 195, 'attraction': 395, 'restaurant': 437, 'train': 494, 'hotel': 394}
+[Info] Dumping lang files...
+Read 56668 pairs train
+Read 7374 pairs val
+Read 7368 pairs test
+Vocab_size: 18275 
+Vocab_size Training 15434
+Vocab_size Belief 1093
+Max. length of dialog words for RNN: 885 
+USE_CUDA=True
+[Train Set Val Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+[Test Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+[[36m2025-04-11 07:21:25,294[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating model <src.models.module.BaseModel>[0m
+/home/kobayashi/dst/.venv/lib/python3.11/site-packages/torch/nn/modules/rnn.py:123: UserWarning: dropout option adds dropout after all but last recurrent layer, so non-zero dropout expects num_layers greater than 1, but got dropout=0.1 and num_layers=1
+  warnings.warn(
+/home/kobayashi/dst/.venv/lib/python3.11/site-packages/lightning/pytorch/utilities/parsing.py:209: Attribute 'model' is an instance of `nn.Module` and is already saved during checkpointing. It is recommended to ignore them using `self.save_hyperparameters(ignore=['model'])`.
+---------------------
+[<src.data.components.dataset.Lang object at 0x7a59c241a490>, <src.data.components.dataset.Lang object at 0x7a59c241a510>]
+[['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']]
+---------------------
+{'_target_': 'src.models.module.BaseModel', 'model': {'_target_': 'src.models.components.simple.TRADE', 'hidden_size': 128, 'lang': [<src.data.components.dataset.Lang object at 0x7a59c241a490>, <src.data.components.dataset.Lang object at 0x7a59c241a510>], 'path': False, 'dropout': 0.1, 'slots': [['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat'], ['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']], 'genSample': False, 'unk_mask': True, 'teacher_forcing_ratio': 0.5, 'use_gate': True, 'nb_train_vocab': 0, 'load_emb': False, 'fix_emb': False, 'parallel_decode': True}, 'optimizer': {'_target_': 'torch.optim.Adam', '_partial_': True, 'lr': 0.001}, 'scheduler': {'_target_': 'torch.optim.lr_scheduler.ReduceLROnPlateau', '_partial_': True, 'mode': 'min'}, 'compile': False}
+[[36m2025-04-11 07:21:25,360[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating callbacks...[0m
+[[36m2025-04-11 07:21:25,360[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating callback <lightning.pytorch.callbacks.ModelCheckpoint>[0m
+[[36m2025-04-11 07:21:25,363[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating callback <lightning.pytorch.callbacks.EarlyStopping>[0m
+[[36m2025-04-11 07:21:25,364[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating callback <lightning.pytorch.callbacks.RichModelSummary>[0m
+[[36m2025-04-11 07:21:25,365[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating callback <lightning.pytorch.callbacks.RichProgressBar>[0m
+[[36m2025-04-11 07:21:25,365[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating loggers...[0m
+[[36m2025-04-11 07:21:25,365[0m][[34msrc.utils.instantiators[0m][[32mINFO[0m] - [rank: 0] Instantiating logger <lightning.pytorch.loggers.tensorboard.TensorBoardLogger>[0m
+[[36m2025-04-11 07:21:25,370[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Instantiating trainer <lightning.pytorch.trainer.Trainer>[0m
+Trainer already configured with model summary callbacks: [<class 'lightning.pytorch.callbacks.rich_model_summary.RichModelSummary'>]. Skipping setting a default `ModelSummary` callback.
+GPU available: True (cuda), used: True
+TPU available: False, using: 0 TPU cores
+HPU available: False, using: 0 HPUs
+[[36m2025-04-11 07:21:25,377[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Logging hyperparameters![0m
+[[36m2025-04-11 07:21:25,404[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Starting training![0m
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
+folder_name logs/logs/
+Reading from data/mwz2.4/train_dials.json
+domain_counter {'hotel': 3381, 'train': 3103, 'attraction': 2717, 'restaurant': 3813, 'taxi': 1654}
+Reading from data/mwz2.4/val_dials.json
+domain_counter {'hotel': 416, 'train': 484, 'attraction': 401, 'restaurant': 438, 'taxi': 207}
+Reading from data/mwz2.4/test_dials.json
+domain_counter {'taxi': 195, 'attraction': 395, 'restaurant': 437, 'train': 494, 'hotel': 394}
+[Info] Dumping lang files...
+Read 56668 pairs train
+Read 7374 pairs val
+Read 7368 pairs test
+Vocab_size: 18275 
+Vocab_size Training 15434
+Vocab_size Belief 1093
+Max. length of dialog words for RNN: 885 
+USE_CUDA=True
+[Train Set Val Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+[Test Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+┏━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━┳━━━━━━━┓
+┃    ┃ Name                        ┃ Type             ┃ Params ┃ Mode  ┃
+┡━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━╇━━━━━━━┩
+│ 0  │ model                       │ TRADE            │  2.6 M │ train │
+│ 1  │ model.cross_entorpy         │ CrossEntropyLoss │      0 │ train │
+│ 2  │ model.encoder               │ EncoderRNN       │  2.5 M │ train │
+│ 3  │ model.encoder.dropout_layer │ Dropout          │      0 │ train │
+│ 4  │ model.encoder.embedding     │ Embedding        │  2.3 M │ train │
+│ 5  │ model.encoder.gru           │ GRU              │  198 K │ train │
+│ 6  │ model.decoder               │ Generator        │  2.4 M │ train │
+│ 7  │ model.decoder.dropout_layer │ Dropout          │      0 │ train │
+│ 8  │ model.decoder.gru           │ GRU              │ 99.1 K │ train │
+│ 9  │ model.decoder.W_ratio       │ Linear           │    385 │ train │
+│ 10 │ model.decoder.softmax       │ Softmax          │      0 │ train │
+│ 11 │ model.decoder.sigmoid       │ Sigmoid          │      0 │ train │
+│ 12 │ model.decoder.W_gate        │ Linear           │    387 │ train │
+│ 13 │ model.decoder.Slot_emb      │ Embedding        │  2.8 K │ train │
+│ 14 │ train_loss                  │ SumMetric        │      0 │ train │
+│ 15 │ val_loss                    │ SumMetric        │      0 │ train │
+│ 16 │ test_loss                   │ SumMetric        │      0 │ train │
+└────┴─────────────────────────────┴──────────────────┴────────┴───────┘
+Trainable params: 2.6 M                                                         
+Non-trainable params: 0                                                         
+Total params: 2.6 M                                                             
+Total estimated model params size (MB): 10                                      
+Modules in train mode: 17                                                       
+Modules in eval mode: 0                                                         
+`Trainer.fit` stopped: `max_epochs=10` reached.
+Epoch 9/9  ━━━━━━━━━━━━━━━━ 443/443 0:46:00 • 0:00:00 0.18it/s v_num: 0.000     
+                                                               val/loss: 9.719  
+                                                               train/loss:      
+                                                               80.250           
+FIT Profiler Report
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|  Action                                                                                                                                                               	|  Mean duration (s)	|  Num calls      	|  Total time (s) 	|  Percentage %   	|
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|  Total                                                                                                                                                                	|  -              	|  195941         	|  2.8921e+04     	|  100 %          	|
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|  run_training_epoch                                                                                                                                                   	|  2890.2         	|  10             	|  2.8902e+04     	|  99.933         	|
+|  run_training_batch                                                                                                                                                   	|  6.0159         	|  4430           	|  2.665e+04      	|  92.148         	|
+|  [LightningModule]BaseModel.optimizer_step                                                                                                                            	|  6.0158         	|  4430           	|  2.665e+04      	|  92.147         	|
+|  [Strategy]SingleDeviceStrategy.backward                                                                                                                              	|  3.3113         	|  4430           	|  1.4669e+04     	|  50.721         	|
+|  [Strategy]SingleDeviceStrategy.training_step                                                                                                                         	|  2.7029         	|  4430           	|  1.1974e+04     	|  41.403         	|
+|  [Strategy]SingleDeviceStrategy.validation_step                                                                                                                       	|  3.8143         	|  582            	|  2219.9         	|  7.6758         	|
+|  [Strategy]SingleDeviceStrategy.batch_to_device                                                                                                                       	|  0.0024163      	|  5012           	|  12.111         	|  0.041875       	|
+|  [LightningModule]BaseModel.transfer_batch_to_device                                                                                                                  	|  0.0023576      	|  5012           	|  11.816         	|  0.040857       	|
+|  [LightningDataModule]DataModule.setup                                                                                                                                	|  7.1891         	|  1              	|  7.1891         	|  0.024858       	|
+|  [Callback]RichProgressBar.on_train_batch_end                                                                                                                         	|  0.00052355     	|  4430           	|  2.3193         	|  0.0080196      	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_epoch_end       	|  0.21649        	|  10             	|  2.1649         	|  0.0074854      	|
+|  save_checkpoint                                                                                                                                                      	|  0.1058         	|  20             	|  2.1161         	|  0.0073168      	|
+|  [_TrainingEpochLoop].train_dataloader_next                                                                                                                           	|  0.00019378     	|  4430           	|  0.85843        	|  0.0029682      	|
+|  [LightningModule]BaseModel.optimizer_zero_grad                                                                                                                       	|  0.0001797      	|  4430           	|  0.79606        	|  0.0027525      	|
+|  [_EvaluationLoop].val_next                                                                                                                                           	|  0.0009648      	|  582            	|  0.56151        	|  0.0019415      	|
+|  [Callback]RichProgressBar.on_validation_batch_end                                                                                                                    	|  0.00050119     	|  582            	|  0.29169        	|  0.0010086      	|
+|  [LightningModule]BaseModel.configure_gradient_clipping                                                                                                               	|  3.705e-05      	|  4430           	|  0.16413        	|  0.00056752     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_batch_end       	|  1.4829e-05     	|  4430           	|  0.06569        	|  0.00022714     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_after_backward                                                                                      	|  5.678e-06      	|  4430           	|  0.025154       	|  8.6973e-05     	|
+|  [Callback]RichProgressBar.on_validation_batch_start                                                                                                                  	|  2.525e-05      	|  582            	|  0.014695       	|  5.0812e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_before_zero_grad                                                                                    	|  2.5568e-06     	|  4430           	|  0.011327       	|  3.9164e-05     	|
+|  [Callback]RichModelSummary.on_fit_start                                                                                                                              	|  0.010785       	|  1              	|  0.010785       	|  3.7292e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_batch_end                                                                                     	|  2.0802e-06     	|  4430           	|  0.0092152      	|  3.1863e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_before_optimizer_step                                                                               	|  1.4902e-06     	|  4430           	|  0.0066015      	|  2.2826e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_batch_start                                                                                   	|  1.4487e-06     	|  4430           	|  0.0064179      	|  2.2191e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_epoch_end                                                                                     	|  0.00061341     	|  10             	|  0.0061341      	|  2.121e-05      	|
+|  [Callback]RichModelSummary.on_after_backward                                                                                                                         	|  1.3424e-06     	|  4430           	|  0.0059467      	|  2.0562e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_before_backward                                                                                     	|  1.2756e-06     	|  4430           	|  0.0056508      	|  1.9539e-05     	|
+|  [Callback]RichProgressBar.on_train_epoch_start                                                                                                                       	|  0.00054806     	|  10             	|  0.0054806      	|  1.895e-05      	|
+|  [LightningModule]BaseModel.on_after_backward                                                                                                                         	|  1.1119e-06     	|  4430           	|  0.0049255      	|  1.7031e-05     	|
+|  [LightningModule]BaseModel.on_after_batch_transfer                                                                                                                   	|  8.8011e-07     	|  5012           	|  0.0044111      	|  1.5252e-05     	|
+|  [Callback]RichProgressBar.on_after_backward                                                                                                                          	|  9.9369e-07     	|  4430           	|  0.0044021      	|  1.5221e-05     	|
+|  [LightningModule]BaseModel.on_before_batch_transfer                                                                                                                  	|  8.5681e-07     	|  5012           	|  0.0042943      	|  1.4848e-05     	|
+|  [LightningModule]BaseModel.on_before_zero_grad                                                                                                                       	|  9.3729e-07     	|  4430           	|  0.0041522      	|  1.4357e-05     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_after_backward        	|  9.2382e-07     	|  4430           	|  0.0040925      	|  1.4151e-05     	|
+|  [LightningModule]BaseModel.on_train_batch_end                                                                                                                        	|  9.0641e-07     	|  4430           	|  0.0040154      	|  1.3884e-05     	|
+|  [Strategy]SingleDeviceStrategy.on_train_batch_start                                                                                                                  	|  8.6748e-07     	|  4430           	|  0.003843       	|  1.3288e-05     	|
+|  [Callback]RichModelSummary.on_before_zero_grad                                                                                                                       	|  8.3329e-07     	|  4430           	|  0.0036915      	|  1.2764e-05     	|
+|  [Callback]RichModelSummary.on_train_batch_start                                                                                                                      	|  8.2669e-07     	|  4430           	|  0.0036622      	|  1.2663e-05     	|
+|  [Callback]RichModelSummary.on_train_batch_end                                                                                                                        	|  8.1407e-07     	|  4430           	|  0.0036063      	|  1.247e-05      	|
+|  [LightningModule]BaseModel.on_train_batch_start                                                                                                                      	|  8.0129e-07     	|  4430           	|  0.0035497      	|  1.2274e-05     	|
+|  [LightningModule]BaseModel.on_before_backward                                                                                                                        	|  7.4129e-07     	|  4430           	|  0.0032839      	|  1.1355e-05     	|
+|  [LightningModule]BaseModel.on_before_optimizer_step                                                                                                                  	|  7.2538e-07     	|  4430           	|  0.0032134      	|  1.1111e-05     	|
+|  [Callback]RichProgressBar.on_before_zero_grad                                                                                                                        	|  7.0794e-07     	|  4430           	|  0.0031362      	|  1.0844e-05     	|
+|  [Callback]RichModelSummary.on_before_optimizer_step                                                                                                                  	|  6.8991e-07     	|  4430           	|  0.0030563      	|  1.0568e-05     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_before_zero_grad      	|  6.7186e-07     	|  4430           	|  0.0029763      	|  1.0291e-05     	|
+|  [Callback]RichProgressBar.on_train_batch_start                                                                                                                       	|  6.7122e-07     	|  4430           	|  0.0029735      	|  1.0281e-05     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_batch_start     	|  6.5939e-07     	|  4430           	|  0.0029211      	|  1.01e-05       	|
+|  [Callback]RichModelSummary.on_before_backward                                                                                                                        	|  6.4886e-07     	|  4430           	|  0.0028745      	|  9.939e-06      	|
+|  [Callback]RichProgressBar.on_before_backward                                                                                                                         	|  6.3966e-07     	|  4430           	|  0.0028337      	|  9.7981e-06     	|
+|  [LightningModule]BaseModel.on_validation_model_eval                                                                                                                  	|  0.00024529     	|  11             	|  0.0026982      	|  9.3296e-06     	|
+|  [Callback]RichProgressBar.on_before_optimizer_step                                                                                                                   	|  6.022e-07      	|  4430           	|  0.0026677      	|  9.2242e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_before_optimizer_step 	|  5.8647e-07     	|  4430           	|  0.0025981      	|  8.9833e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_before_backward       	|  5.7422e-07     	|  4430           	|  0.0025438      	|  8.7956e-06     	|
+|  [Callback]RichProgressBar.teardown                                                                                                                                   	|  0.0017868      	|  1              	|  0.0017868      	|  6.1781e-06     	|
+|  [Callback]RichProgressBar.on_validation_epoch_end                                                                                                                    	|  0.00015542     	|  11             	|  0.0017096      	|  5.9113e-06     	|
+|  [LightningModule]BaseModel.on_validation_model_zero_grad                                                                                                             	|  0.00016249     	|  10             	|  0.0016249      	|  5.6184e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_batch_end  	|  2.5151e-06     	|  582            	|  0.0014638      	|  5.0613e-06     	|
+|  [Callback]RichProgressBar.on_train_epoch_end                                                                                                                         	|  0.00012526     	|  10             	|  0.0012526      	|  4.3311e-06     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_batch_end                                                                                	|  1.8885e-06     	|  582            	|  0.0010991      	|  3.8004e-06     	|
+|  [Callback]RichProgressBar.on_validation_end                                                                                                                          	|  8.3644e-05     	|  11             	|  0.00092009     	|  3.1814e-06     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_batch_start                                                                              	|  1.4468e-06     	|  582            	|  0.00084202     	|  2.9114e-06     	|
+|  [LightningModule]BaseModel.on_validation_batch_end                                                                                                                   	|  1.0283e-06     	|  582            	|  0.00059845     	|  2.0693e-06     	|
+|  [LightningModule]BaseModel.on_validation_batch_start                                                                                                                 	|  7.9337e-07     	|  582            	|  0.00046174     	|  1.5966e-06     	|
+|  [Callback]RichModelSummary.on_validation_batch_end                                                                                                                   	|  7.7168e-07     	|  582            	|  0.00044912     	|  1.5529e-06     	|
+|  [LightningModule]BaseModel.lr_scheduler_step                                                                                                                         	|  4.4594e-05     	|  10             	|  0.00044594     	|  1.5419e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_end        	|  3.8512e-05     	|  11             	|  0.00042364     	|  1.4648e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_batch_start	|  6.8939e-07     	|  582            	|  0.00040122     	|  1.3873e-06     	|
+|  [Callback]RichModelSummary.on_validation_batch_start                                                                                                                 	|  6.7813e-07     	|  582            	|  0.00039467     	|  1.3647e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.setup                    	|  0.00035299     	|  1              	|  0.00035299     	|  1.2205e-06     	|
+|  [LightningModule]BaseModel.on_train_start                                                                                                                            	|  0.00029561     	|  1              	|  0.00029561     	|  1.0221e-06     	|
+|  [LightningDataModule]DataModule.val_dataloader                                                                                                                       	|  0.00029333     	|  1              	|  0.00029333     	|  1.0142e-06     	|
+|  [LightningDataModule]DataModule.train_dataloader                                                                                                                     	|  0.00025403     	|  1              	|  0.00025403     	|  8.7838e-07     	|
+|  [LightningModule]BaseModel.configure_optimizers                                                                                                                      	|  0.00022861     	|  1              	|  0.00022861     	|  7.9048e-07     	|
+|  [Callback]RichProgressBar.on_validation_start                                                                                                                        	|  1.9951e-05     	|  11             	|  0.00021946     	|  7.5883e-07     	|
+|  [Callback]RichProgressBar.on_sanity_check_start                                                                                                                      	|  0.00021376     	|  1              	|  0.00021376     	|  7.3912e-07     	|
+|  [Callback]RichProgressBar.on_sanity_check_end                                                                                                                        	|  8.986e-05      	|  1              	|  8.986e-05      	|  3.1071e-07     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_end                                                                                      	|  4.4757e-06     	|  11             	|  4.9233e-05     	|  1.7023e-07     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_start                                                                                    	|  3.827e-06      	|  11             	|  4.2097e-05     	|  1.4556e-07     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_epoch_start                                                                              	|  3.7669e-06     	|  11             	|  4.1435e-05     	|  1.4327e-07     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_epoch_start                                                                                   	|  3.6455e-06     	|  10             	|  3.6455e-05     	|  1.2605e-07     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_save_checkpoint                                                                                     	|  1.7162e-06     	|  20             	|  3.4325e-05     	|  1.1868e-07     	|
+|  [Callback]RichProgressBar.on_train_start                                                                                                                             	|  3.3528e-05     	|  1              	|  3.3528e-05     	|  1.1593e-07     	|
+|  [Strategy]SingleDeviceStrategy.on_validation_start                                                                                                                   	|  2.9894e-06     	|  11             	|  3.2883e-05     	|  1.137e-07      	|
+|  [LightningModule]BaseModel.on_validation_start                                                                                                                       	|  2.8934e-06     	|  11             	|  3.1827e-05     	|  1.1005e-07     	|
+|  [Strategy]SingleDeviceStrategy.on_validation_end                                                                                                                     	|  2.7725e-06     	|  11             	|  3.0498e-05     	|  1.0545e-07     	|
+|  [LightningDataModule]DataModule.state_dict                                                                                                                           	|  1.395e-06      	|  20             	|  2.7901e-05     	|  9.6472e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_epoch_end                                                                                	|  2.03e-06       	|  11             	|  2.233e-05      	|  7.7211e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_epoch_start     	|  1.998e-06      	|  10             	|  1.998e-05      	|  6.9084e-08     	|
+|  [Callback]RichModelSummary.on_train_epoch_end                                                                                                                        	|  1.6726e-06     	|  10             	|  1.6726e-05     	|  5.7832e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_save_checkpoint       	|  7.5945e-07     	|  20             	|  1.5189e-05     	|  5.2519e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_start                                                                                         	|  1.4945e-05     	|  1              	|  1.4945e-05     	|  5.1675e-08     	|
+|  [Callback]RichModelSummary.on_save_checkpoint                                                                                                                        	|  7.045e-07      	|  20             	|  1.409e-05      	|  4.8719e-08     	|
+|  [LightningModule]BaseModel.on_train_epoch_start                                                                                                                      	|  1.3051e-06     	|  10             	|  1.3051e-05     	|  4.5125e-08     	|
+|  [Callback]RichModelSummary.on_validation_end                                                                                                                         	|  1.181e-06      	|  11             	|  1.2991e-05     	|  4.4919e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_start           	|  1.2972e-05     	|  1              	|  1.2972e-05     	|  4.4855e-08     	|
+|  [Callback]RichProgressBar.on_save_checkpoint                                                                                                                         	|  6.1397e-07     	|  20             	|  1.2279e-05     	|  4.2459e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_epoch_end  	|  1.0239e-06     	|  11             	|  1.1263e-05     	|  3.8945e-08     	|
+|  [LightningModule]BaseModel.on_validation_end                                                                                                                         	|  8.8476e-07     	|  11             	|  9.7323e-06     	|  3.3651e-08     	|
+|  [Callback]RichModelSummary.on_validation_start                                                                                                                       	|  8.6799e-07     	|  11             	|  9.5479e-06     	|  3.3014e-08     	|
+|  [LightningModule]BaseModel.on_save_checkpoint                                                                                                                        	|  4.773e-07      	|  20             	|  9.5461e-06     	|  3.3007e-08     	|
+|  [Callback]RichModelSummary.on_validation_epoch_start                                                                                                                 	|  8.431e-07      	|  11             	|  9.2741e-06     	|  3.2067e-08     	|
+|  [LightningModule]BaseModel.on_train_epoch_end                                                                                                                        	|  8.869e-07      	|  10             	|  8.869e-06      	|  3.0666e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_start      	|  7.9399e-07     	|  11             	|  8.7339e-06     	|  3.0199e-08     	|
+|  [Callback]RichProgressBar.setup                                                                                                                                      	|  8.5272e-06     	|  1              	|  8.5272e-06     	|  2.9484e-08     	|
+|  [Callback]RichModelSummary.on_train_epoch_start                                                                                                                      	|  8.1798e-07     	|  10             	|  8.1798e-06     	|  2.8283e-08     	|
+|  [LightningModule]BaseModel.on_validation_epoch_end                                                                                                                   	|  7.1974e-07     	|  11             	|  7.9172e-06     	|  2.7375e-08     	|
+|  [LightningModule]BaseModel.setup                                                                                                                                     	|  7.6881e-06     	|  1              	|  7.6881e-06     	|  2.6583e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_epoch_start	|  6.8334e-07     	|  11             	|  7.5167e-06     	|  2.599e-08      	|
+|  [Callback]RichModelSummary.on_validation_epoch_end                                                                                                                   	|  6.6251e-07     	|  11             	|  7.2876e-06     	|  2.5198e-08     	|
+|  [Callback]RichProgressBar.on_validation_epoch_start                                                                                                                  	|  6.2085e-07     	|  11             	|  6.8294e-06     	|  2.3614e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.setup                                                                                                  	|  6.6701e-06     	|  1              	|  6.6701e-06     	|  2.3063e-08     	|
+|  [LightningModule]BaseModel.on_validation_epoch_start                                                                                                                 	|  5.5083e-07     	|  11             	|  6.0592e-06     	|  2.0951e-08     	|
+|  [Strategy]SingleDeviceStrategy.on_train_start                                                                                                                        	|  4.3204e-06     	|  1              	|  4.3204e-06     	|  1.4939e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.teardown                 	|  4.2431e-06     	|  1              	|  4.2431e-06     	|  1.4671e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_fit_end                                                                                             	|  3.7877e-06     	|  1              	|  3.7877e-06     	|  1.3097e-08     	|
+|  [Callback]RichProgressBar.on_fit_start                                                                                                                               	|  3.1246e-06     	|  1              	|  3.1246e-06     	|  1.0804e-08     	|
+|  [LightningModule]BaseModel.configure_callbacks                                                                                                                       	|  3.106e-06      	|  1              	|  3.106e-06      	|  1.0739e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_end                                                                                           	|  2.8228e-06     	|  1              	|  2.8228e-06     	|  9.7605e-09     	|
+|  [Callback]RichModelSummary.setup                                                                                                                                     	|  2.075e-06      	|  1              	|  2.075e-06      	|  7.1747e-09     	|
+|  [Callback]RichModelSummary.on_train_start                                                                                                                            	|  1.7369e-06     	|  1              	|  1.7369e-06     	|  6.0057e-09     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_fit_start                                                                                           	|  1.7341e-06     	|  1              	|  1.7341e-06     	|  5.9961e-09     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_sanity_check_start                                                                                  	|  1.7006e-06     	|  1              	|  1.7006e-06     	|  5.8801e-09     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_sanity_check_end                                                                                    	|  1.5777e-06     	|  1              	|  1.5777e-06     	|  5.4551e-09     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.teardown                                                                                               	|  1.3383e-06     	|  1              	|  1.3383e-06     	|  4.6275e-09     	|
+|  [LightningDataModule]DataModule.teardown                                                                                                                             	|  1.3327e-06     	|  1              	|  1.3327e-06     	|  4.6081e-09     	|
+|  [LightningModule]BaseModel.on_fit_start                                                                                                                              	|  1.329e-06      	|  1              	|  1.329e-06      	|  4.5953e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_end             	|  1.2591e-06     	|  1              	|  1.2591e-06     	|  4.3537e-09     	|
+|  [Callback]RichModelSummary.on_train_end                                                                                                                              	|  1.207e-06      	|  1              	|  1.207e-06      	|  4.1734e-09     	|
+|  [LightningModule]BaseModel.teardown                                                                                                                                  	|  1.1912e-06     	|  1              	|  1.1912e-06     	|  4.1187e-09     	|
+|  [LightningModule]BaseModel.on_train_end                                                                                                                              	|  1.1604e-06     	|  1              	|  1.1604e-06     	|  4.0124e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_sanity_check_start    	|  1.0664e-06     	|  1              	|  1.0664e-06     	|  3.6872e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_fit_start             	|  9.4995e-07     	|  1              	|  9.4995e-07     	|  3.2846e-09     	|
+|  [Callback]RichModelSummary.teardown                                                                                                                                  	|  9.1735e-07     	|  1              	|  9.1735e-07     	|  3.1719e-09     	|
+|  [Callback]RichProgressBar.on_fit_end                                                                                                                                 	|  8.9779e-07     	|  1              	|  8.9779e-07     	|  3.1043e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_sanity_check_end      	|  8.8289e-07     	|  1              	|  8.8289e-07     	|  3.0528e-09     	|
+|  [Strategy]SingleDeviceStrategy.on_train_end                                                                                                                          	|  8.7731e-07     	|  1              	|  8.7731e-07     	|  3.0335e-09     	|
+|  [Callback]RichModelSummary.on_fit_end                                                                                                                                	|  8.2888e-07     	|  1              	|  8.2888e-07     	|  2.866e-09      	|
+|  [Callback]RichModelSummary.on_sanity_check_end                                                                                                                       	|  8.0001e-07     	|  1              	|  8.0001e-07     	|  2.7662e-09     	|
+|  [Callback]RichProgressBar.on_train_end                                                                                                                               	|  7.879e-07      	|  1              	|  7.879e-07      	|  2.7243e-09     	|
+|  [Callback]RichModelSummary.on_sanity_check_start                                                                                                                     	|  7.8138e-07     	|  1              	|  7.8138e-07     	|  2.7018e-09     	|
+|  [LightningModule]BaseModel.on_fit_end                                                                                                                                	|  7.3854e-07     	|  1              	|  7.3854e-07     	|  2.5536e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_fit_end               	|  6.4634e-07     	|  1              	|  6.4634e-07     	|  2.2348e-09     	|
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+[[36m2025-04-11 15:23:26,430[0m][[34m__main__[0m][[32mINFO[0m] - [rank: 0] Starting validation only![0m
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0,1]
+folder_name logs/logs/
+Reading from data/mwz2.4/train_dials.json
+domain_counter {'hotel': 3381, 'train': 3103, 'attraction': 2717, 'restaurant': 3813, 'taxi': 1654}
+Reading from data/mwz2.4/val_dials.json
+domain_counter {'hotel': 416, 'train': 484, 'attraction': 401, 'restaurant': 438, 'taxi': 207}
+Reading from data/mwz2.4/test_dials.json
+domain_counter {'taxi': 195, 'attraction': 395, 'restaurant': 437, 'train': 494, 'hotel': 394}
+[Info] Dumping lang files...
+Read 56668 pairs train
+Read 7374 pairs val
+Read 7368 pairs test
+Vocab_size: 18275 
+Vocab_size Training 15434
+Vocab_size Belief 1093
+Max. length of dialog words for RNN: 885 
+USE_CUDA=True
+[Train Set Val Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+[Test Set Slots]: Number is 30 in total
+['attraction-area', 'attraction-name', 'attraction-type', 'hotel-area', 'hotel-book day', 'hotel-book people', 'hotel-book stay', 'hotel-internet', 'hotel-name', 'hotel-parking', 'hotel-pricerange', 'hotel-stars', 'hotel-type', 'restaurant-area', 'restaurant-book day', 'restaurant-book people', 'restaurant-book time', 'restaurant-food', 'restaurant-name', 'restaurant-pricerange', 'taxi-arriveby', 'taxi-departure', 'taxi-destination', 'taxi-leaveat', 'train-arriveby', 'train-book people', 'train-day', 'train-departure', 'train-destination', 'train-leaveat']
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃      Validate metric      ┃       DataLoader 0        ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│         val/loss          │     9.719486236572266     │
+└───────────────────────────┴───────────────────────────┘
+Validation ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 58/58 0:03:36 • 0:00:00 0.28it/s 
+VALIDATE Profiler Report
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|  Action                                                                                                                                                               	|  Mean duration (s)	|  Num calls      	|  Total time (s) 	|  Percentage %   	|
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|  Total                                                                                                                                                                	|  -              	|  196906         	|  2.9146e+04     	|  100 %          	|
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+|  run_training_epoch                                                                                                                                                   	|  2890.2         	|  10             	|  2.8902e+04     	|  99.16          	|
+|  run_training_batch                                                                                                                                                   	|  6.0159         	|  4430           	|  2.665e+04      	|  91.436         	|
+|  [LightningModule]BaseModel.optimizer_step                                                                                                                            	|  6.0158         	|  4430           	|  2.665e+04      	|  91.435         	|
+|  [Strategy]SingleDeviceStrategy.backward                                                                                                                              	|  3.3113         	|  4430           	|  1.4669e+04     	|  50.328         	|
+|  [Strategy]SingleDeviceStrategy.training_step                                                                                                                         	|  2.7029         	|  4430           	|  1.1974e+04     	|  41.082         	|
+|  [Strategy]SingleDeviceStrategy.validation_step                                                                                                                       	|  3.8074         	|  640            	|  2436.7         	|  8.3603         	|
+|  [LightningDataModule]DataModule.setup                                                                                                                                	|  7.1314         	|  2              	|  14.263         	|  0.048935       	|
+|  [Strategy]SingleDeviceStrategy.batch_to_device                                                                                                                       	|  0.0024137      	|  5070           	|  12.237         	|  0.041985       	|
+|  [LightningModule]BaseModel.transfer_batch_to_device                                                                                                                  	|  0.002355       	|  5070           	|  11.94          	|  0.040965       	|
+|  [Callback]RichProgressBar.on_train_batch_end                                                                                                                         	|  0.00052355     	|  4430           	|  2.3193         	|  0.0079575      	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_epoch_end       	|  0.21649        	|  10             	|  2.1649         	|  0.0074275      	|
+|  save_checkpoint                                                                                                                                                      	|  0.1058         	|  20             	|  2.1161         	|  0.0072602      	|
+|  [_TrainingEpochLoop].train_dataloader_next                                                                                                                           	|  0.00019378     	|  4430           	|  0.85843        	|  0.0029452      	|
+|  [LightningModule]BaseModel.optimizer_zero_grad                                                                                                                       	|  0.0001797      	|  4430           	|  0.79606        	|  0.0027312      	|
+|  [_EvaluationLoop].val_next                                                                                                                                           	|  0.0011115      	|  640            	|  0.71139        	|  0.0024407      	|
+|  [Callback]RichProgressBar.on_validation_batch_end                                                                                                                    	|  0.00048983     	|  640            	|  0.31349        	|  0.0010756      	|
+|  [LightningModule]BaseModel.configure_gradient_clipping                                                                                                               	|  3.705e-05      	|  4430           	|  0.16413        	|  0.00056313     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_batch_end       	|  1.4829e-05     	|  4430           	|  0.06569        	|  0.00022538     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_after_backward                                                                                      	|  5.678e-06      	|  4430           	|  0.025154       	|  8.6301e-05     	|
+|  [Callback]RichProgressBar.on_validation_batch_start                                                                                                                  	|  2.3742e-05     	|  640            	|  0.015195       	|  5.2134e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_before_zero_grad                                                                                    	|  2.5568e-06     	|  4430           	|  0.011327       	|  3.8861e-05     	|
+|  [Callback]RichModelSummary.on_fit_start                                                                                                                              	|  0.010785       	|  1              	|  0.010785       	|  3.7003e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_batch_end                                                                                     	|  2.0802e-06     	|  4430           	|  0.0092152      	|  3.1617e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_before_optimizer_step                                                                               	|  1.4902e-06     	|  4430           	|  0.0066015      	|  2.2649e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_batch_start                                                                                   	|  1.4487e-06     	|  4430           	|  0.0064179      	|  2.2019e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_epoch_end                                                                                     	|  0.00061341     	|  10             	|  0.0061341      	|  2.1046e-05     	|
+|  [Callback]RichModelSummary.on_after_backward                                                                                                                         	|  1.3424e-06     	|  4430           	|  0.0059467      	|  2.0403e-05     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_before_backward                                                                                     	|  1.2756e-06     	|  4430           	|  0.0056508      	|  1.9388e-05     	|
+|  [Callback]RichProgressBar.on_train_epoch_start                                                                                                                       	|  0.00054806     	|  10             	|  0.0054806      	|  1.8804e-05     	|
+|  [LightningModule]BaseModel.on_after_backward                                                                                                                         	|  1.1119e-06     	|  4430           	|  0.0049255      	|  1.6899e-05     	|
+|  [LightningModule]BaseModel.on_after_batch_transfer                                                                                                                   	|  8.7933e-07     	|  5070           	|  0.0044582      	|  1.5296e-05     	|
+|  [Callback]RichProgressBar.on_after_backward                                                                                                                          	|  9.9369e-07     	|  4430           	|  0.0044021      	|  1.5103e-05     	|
+|  [LightningModule]BaseModel.on_before_batch_transfer                                                                                                                  	|  8.584e-07      	|  5070           	|  0.0043521      	|  1.4932e-05     	|
+|  [LightningModule]BaseModel.on_before_zero_grad                                                                                                                       	|  9.3729e-07     	|  4430           	|  0.0041522      	|  1.4246e-05     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_after_backward        	|  9.2382e-07     	|  4430           	|  0.0040925      	|  1.4041e-05     	|
+|  [LightningModule]BaseModel.on_train_batch_end                                                                                                                        	|  9.0641e-07     	|  4430           	|  0.0040154      	|  1.3777e-05     	|
+|  [Strategy]SingleDeviceStrategy.on_train_batch_start                                                                                                                  	|  8.6748e-07     	|  4430           	|  0.003843       	|  1.3185e-05     	|
+|  [Callback]RichModelSummary.on_before_zero_grad                                                                                                                       	|  8.3329e-07     	|  4430           	|  0.0036915      	|  1.2665e-05     	|
+|  [Callback]RichModelSummary.on_train_batch_start                                                                                                                      	|  8.2669e-07     	|  4430           	|  0.0036622      	|  1.2565e-05     	|
+|  [Callback]RichModelSummary.on_train_batch_end                                                                                                                        	|  8.1407e-07     	|  4430           	|  0.0036063      	|  1.2373e-05     	|
+|  [LightningModule]BaseModel.on_train_batch_start                                                                                                                      	|  8.0129e-07     	|  4430           	|  0.0035497      	|  1.2179e-05     	|
+|  [LightningModule]BaseModel.on_before_backward                                                                                                                        	|  7.4129e-07     	|  4430           	|  0.0032839      	|  1.1267e-05     	|
+|  [LightningModule]BaseModel.on_before_optimizer_step                                                                                                                  	|  7.2538e-07     	|  4430           	|  0.0032134      	|  1.1025e-05     	|
+|  [Callback]RichProgressBar.on_before_zero_grad                                                                                                                        	|  7.0794e-07     	|  4430           	|  0.0031362      	|  1.076e-05      	|
+|  [Callback]RichProgressBar.teardown                                                                                                                                   	|  0.0015656      	|  2              	|  0.0031311      	|  1.0743e-05     	|
+|  [Callback]RichModelSummary.on_before_optimizer_step                                                                                                                  	|  6.8991e-07     	|  4430           	|  0.0030563      	|  1.0486e-05     	|
+|  [LightningModule]BaseModel.on_validation_model_eval                                                                                                                  	|  0.00025166     	|  12             	|  0.00302        	|  1.0361e-05     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_before_zero_grad      	|  6.7186e-07     	|  4430           	|  0.0029763      	|  1.0212e-05     	|
+|  [Callback]RichProgressBar.on_train_batch_start                                                                                                                       	|  6.7122e-07     	|  4430           	|  0.0029735      	|  1.0202e-05     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_batch_start     	|  6.5939e-07     	|  4430           	|  0.0029211      	|  1.0022e-05     	|
+|  [Callback]RichModelSummary.on_before_backward                                                                                                                        	|  6.4886e-07     	|  4430           	|  0.0028745      	|  9.8621e-06     	|
+|  [Callback]RichProgressBar.on_before_backward                                                                                                                         	|  6.3966e-07     	|  4430           	|  0.0028337      	|  9.7223e-06     	|
+|  [Callback]RichProgressBar.on_before_optimizer_step                                                                                                                   	|  6.022e-07      	|  4430           	|  0.0026677      	|  9.1529e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_before_optimizer_step 	|  5.8647e-07     	|  4430           	|  0.0025981      	|  8.9138e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_before_backward       	|  5.7422e-07     	|  4430           	|  0.0025438      	|  8.7276e-06     	|
+|  [Callback]RichProgressBar.on_validation_epoch_end                                                                                                                    	|  0.00014274     	|  12             	|  0.0017129      	|  5.8768e-06     	|
+|  [Callback]RichProgressBar.on_validation_start                                                                                                                        	|  0.00013678     	|  12             	|  0.0016414      	|  5.6314e-06     	|
+|  [LightningModule]BaseModel.on_validation_model_zero_grad                                                                                                             	|  0.00016249     	|  10             	|  0.0016249      	|  5.5749e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_batch_end  	|  2.4855e-06     	|  640            	|  0.0015907      	|  5.4577e-06     	|
+|  [Callback]RichProgressBar.on_train_epoch_end                                                                                                                         	|  0.00012526     	|  10             	|  0.0012526      	|  4.2976e-06     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_batch_end                                                                                	|  1.8923e-06     	|  640            	|  0.0012111      	|  4.1552e-06     	|
+|  [Callback]RichProgressBar.on_validation_end                                                                                                                          	|  7.6957e-05     	|  12             	|  0.00092348     	|  3.1684e-06     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_batch_start                                                                              	|  1.4425e-06     	|  640            	|  0.00092321     	|  3.1675e-06     	|
+|  [LightningModule]BaseModel.on_validation_batch_end                                                                                                                   	|  1.0318e-06     	|  640            	|  0.00066036     	|  2.2657e-06     	|
+|  [LightningModule]BaseModel.on_validation_batch_start                                                                                                                 	|  7.9389e-07     	|  640            	|  0.00050809     	|  1.7432e-06     	|
+|  [LightningDataModule]DataModule.val_dataloader                                                                                                                       	|  0.00024768     	|  2              	|  0.00049537     	|  1.6996e-06     	|
+|  [Callback]RichModelSummary.on_validation_batch_end                                                                                                                   	|  7.6818e-07     	|  640            	|  0.00049163     	|  1.6868e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.setup                    	|  0.00023152     	|  2              	|  0.00046304     	|  1.5887e-06     	|
+|  [LightningModule]BaseModel.lr_scheduler_step                                                                                                                         	|  4.4594e-05     	|  10             	|  0.00044594     	|  1.53e-06       	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_batch_start	|  6.8265e-07     	|  640            	|  0.0004369      	|  1.499e-06      	|
+|  [Callback]RichModelSummary.on_validation_batch_start                                                                                                                 	|  6.8076e-07     	|  640            	|  0.00043569     	|  1.4948e-06     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_end        	|  3.6179e-05     	|  12             	|  0.00043415     	|  1.4895e-06     	|
+|  [LightningModule]BaseModel.on_train_start                                                                                                                            	|  0.00029561     	|  1              	|  0.00029561     	|  1.0142e-06     	|
+|  [LightningDataModule]DataModule.train_dataloader                                                                                                                     	|  0.00025403     	|  1              	|  0.00025403     	|  8.7158e-07     	|
+|  [LightningModule]BaseModel.configure_optimizers                                                                                                                      	|  0.00022861     	|  1              	|  0.00022861     	|  7.8437e-07     	|
+|  [Callback]RichProgressBar.on_sanity_check_start                                                                                                                      	|  0.00021376     	|  1              	|  0.00021376     	|  7.334e-07      	|
+|  [Callback]RichProgressBar.on_sanity_check_end                                                                                                                        	|  8.986e-05      	|  1              	|  8.986e-05      	|  3.083e-07      	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_end                                                                                      	|  4.4171e-06     	|  12             	|  5.3005e-05     	|  1.8186e-07     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_start                                                                                    	|  3.8946e-06     	|  12             	|  4.6735e-05     	|  1.6034e-07     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_epoch_start                                                                              	|  3.7744e-06     	|  12             	|  4.5293e-05     	|  1.554e-07      	|
+|  [LightningModule]BaseModel.on_validation_start                                                                                                                       	|  3.0599e-06     	|  12             	|  3.6718e-05     	|  1.2598e-07     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_epoch_start                                                                                   	|  3.6455e-06     	|  10             	|  3.6455e-05     	|  1.2507e-07     	|
+|  [Strategy]SingleDeviceStrategy.on_validation_start                                                                                                                   	|  3.0044e-06     	|  12             	|  3.6053e-05     	|  1.237e-07      	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_save_checkpoint                                                                                     	|  1.7162e-06     	|  20             	|  3.4325e-05     	|  1.1777e-07     	|
+|  [Callback]RichProgressBar.on_train_start                                                                                                                             	|  3.3528e-05     	|  1              	|  3.3528e-05     	|  1.1503e-07     	|
+|  [Strategy]SingleDeviceStrategy.on_validation_end                                                                                                                     	|  2.7782e-06     	|  12             	|  3.3339e-05     	|  1.1438e-07     	|
+|  [LightningDataModule]DataModule.state_dict                                                                                                                           	|  1.395e-06      	|  20             	|  2.7901e-05     	|  9.5726e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_validation_epoch_end                                                                                	|  2.0156e-06     	|  12             	|  2.4187e-05     	|  8.2986e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_epoch_start     	|  1.998e-06      	|  10             	|  1.998e-05      	|  6.8549e-08     	|
+|  [Callback]RichModelSummary.on_train_epoch_end                                                                                                                        	|  1.6726e-06     	|  10             	|  1.6726e-05     	|  5.7385e-08     	|
+|  [LightningModule]BaseModel.setup                                                                                                                                     	|  8.1444e-06     	|  2              	|  1.6289e-05     	|  5.5886e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_save_checkpoint       	|  7.5945e-07     	|  20             	|  1.5189e-05     	|  5.2113e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_start                                                                                         	|  1.4945e-05     	|  1              	|  1.4945e-05     	|  5.1275e-08     	|
+|  [Callback]RichModelSummary.on_save_checkpoint                                                                                                                        	|  7.045e-07      	|  20             	|  1.409e-05      	|  4.8342e-08     	|
+|  [Callback]RichModelSummary.on_validation_end                                                                                                                         	|  1.1645e-06     	|  12             	|  1.3974e-05     	|  4.7943e-08     	|
+|  [Callback]RichProgressBar.setup                                                                                                                                      	|  6.7702e-06     	|  2              	|  1.354e-05      	|  4.6457e-08     	|
+|  [LightningModule]BaseModel.on_train_epoch_start                                                                                                                      	|  1.3051e-06     	|  10             	|  1.3051e-05     	|  4.4776e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_start           	|  1.2972e-05     	|  1              	|  1.2972e-05     	|  4.4508e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_start      	|  1.0722e-06     	|  12             	|  1.2866e-05     	|  4.4143e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.setup                                                                                                  	|  6.2166e-06     	|  2              	|  1.2433e-05     	|  4.2658e-08     	|
+|  [Callback]RichProgressBar.on_save_checkpoint                                                                                                                         	|  6.1397e-07     	|  20             	|  1.2279e-05     	|  4.213e-08      	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_epoch_end  	|  9.8612e-07     	|  12             	|  1.1833e-05     	|  4.06e-08       	|
+|  [Callback]RichModelSummary.on_validation_start                                                                                                                       	|  9.3559e-07     	|  12             	|  1.1227e-05     	|  3.852e-08      	|
+|  [LightningModule]BaseModel.on_validation_end                                                                                                                         	|  8.7676e-07     	|  12             	|  1.0521e-05     	|  3.6098e-08     	|
+|  [Callback]RichModelSummary.on_validation_epoch_start                                                                                                                 	|  8.6823e-07     	|  12             	|  1.0419e-05     	|  3.5746e-08     	|
+|  [LightningModule]BaseModel.on_save_checkpoint                                                                                                                        	|  4.773e-07      	|  20             	|  9.5461e-06     	|  3.2752e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.teardown                 	|  4.5607e-06     	|  2              	|  9.1214e-06     	|  3.1295e-08     	|
+|  [LightningModule]BaseModel.on_train_epoch_end                                                                                                                        	|  8.869e-07      	|  10             	|  8.869e-06      	|  3.0429e-08     	|
+|  [LightningModule]BaseModel.on_validation_epoch_end                                                                                                                   	|  7.1758e-07     	|  12             	|  8.611e-06      	|  2.9544e-08     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_validation_epoch_start	|  6.9888e-07     	|  12             	|  8.3866e-06     	|  2.8774e-08     	|
+|  [Callback]RichModelSummary.on_train_epoch_start                                                                                                                      	|  8.1798e-07     	|  10             	|  8.1798e-06     	|  2.8065e-08     	|
+|  [Callback]RichModelSummary.on_validation_epoch_end                                                                                                                   	|  6.5938e-07     	|  12             	|  7.9125e-06     	|  2.7147e-08     	|
+|  [Callback]RichProgressBar.on_validation_epoch_start                                                                                                                  	|  6.5813e-07     	|  12             	|  7.8976e-06     	|  2.7096e-08     	|
+|  [LightningModule]BaseModel.on_validation_epoch_start                                                                                                                 	|  6.295e-07      	|  12             	|  7.554e-06      	|  2.5917e-08     	|
+|  [LightningModule]BaseModel.configure_callbacks                                                                                                                       	|  3.2294e-06     	|  2              	|  6.4587e-06     	|  2.216e-08      	|
+|  [Strategy]SingleDeviceStrategy.on_train_start                                                                                                                        	|  4.3204e-06     	|  1              	|  4.3204e-06     	|  1.4823e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_fit_end                                                                                             	|  3.7877e-06     	|  1              	|  3.7877e-06     	|  1.2995e-08     	|
+|  [LightningDataModule]DataModule.teardown                                                                                                                             	|  1.7369e-06     	|  2              	|  3.4738e-06     	|  1.1919e-08     	|
+|  [Callback]RichModelSummary.setup                                                                                                                                     	|  1.7127e-06     	|  2              	|  3.4254e-06     	|  1.1752e-08     	|
+|  [Callback]RichProgressBar.on_fit_start                                                                                                                               	|  3.1246e-06     	|  1              	|  3.1246e-06     	|  1.072e-08      	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.teardown                                                                                               	|  1.5325e-06     	|  2              	|  3.065e-06      	|  1.0516e-08     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_train_end                                                                                           	|  2.8228e-06     	|  1              	|  2.8228e-06     	|  9.685e-09      	|
+|  [LightningModule]BaseModel.teardown                                                                                                                                  	|  1.2228e-06     	|  2              	|  2.4457e-06     	|  8.3909e-09     	|
+|  [Callback]RichModelSummary.on_train_start                                                                                                                            	|  1.7369e-06     	|  1              	|  1.7369e-06     	|  5.9593e-09     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_fit_start                                                                                           	|  1.7341e-06     	|  1              	|  1.7341e-06     	|  5.9497e-09     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_sanity_check_start                                                                                  	|  1.7006e-06     	|  1              	|  1.7006e-06     	|  5.8347e-09     	|
+|  [Callback]RichModelSummary.teardown                                                                                                                                  	|  8.2282e-07     	|  2              	|  1.6456e-06     	|  5.6461e-09     	|
+|  [Callback]EarlyStopping{'monitor': 'val/loss', 'mode': 'min'}.on_sanity_check_end                                                                                    	|  1.5777e-06     	|  1              	|  1.5777e-06     	|  5.4129e-09     	|
+|  [LightningModule]BaseModel.on_fit_start                                                                                                                              	|  1.329e-06      	|  1              	|  1.329e-06      	|  4.5597e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_train_end             	|  1.2591e-06     	|  1              	|  1.2591e-06     	|  4.3201e-09     	|
+|  [Callback]RichModelSummary.on_train_end                                                                                                                              	|  1.207e-06      	|  1              	|  1.207e-06      	|  4.1411e-09     	|
+|  [LightningModule]BaseModel.on_train_end                                                                                                                              	|  1.1604e-06     	|  1              	|  1.1604e-06     	|  3.9814e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_sanity_check_start    	|  1.0664e-06     	|  1              	|  1.0664e-06     	|  3.6586e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_fit_start             	|  9.4995e-07     	|  1              	|  9.4995e-07     	|  3.2592e-09     	|
+|  [Callback]RichProgressBar.on_fit_end                                                                                                                                 	|  8.9779e-07     	|  1              	|  8.9779e-07     	|  3.0803e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_sanity_check_end      	|  8.8289e-07     	|  1              	|  8.8289e-07     	|  3.0292e-09     	|
+|  [Strategy]SingleDeviceStrategy.on_train_end                                                                                                                          	|  8.7731e-07     	|  1              	|  8.7731e-07     	|  3.01e-09       	|
+|  [Callback]RichModelSummary.on_fit_end                                                                                                                                	|  8.2888e-07     	|  1              	|  8.2888e-07     	|  2.8438e-09     	|
+|  [Callback]RichModelSummary.on_sanity_check_end                                                                                                                       	|  8.0001e-07     	|  1              	|  8.0001e-07     	|  2.7448e-09     	|
+|  [Callback]RichProgressBar.on_train_end                                                                                                                               	|  7.879e-07      	|  1              	|  7.879e-07      	|  2.7032e-09     	|
+|  [Callback]RichModelSummary.on_sanity_check_start                                                                                                                     	|  7.8138e-07     	|  1              	|  7.8138e-07     	|  2.6809e-09     	|
+|  [LightningModule]BaseModel.on_fit_end                                                                                                                                	|  7.3854e-07     	|  1              	|  7.3854e-07     	|  2.5339e-09     	|
+|  [Callback]ModelCheckpoint{'monitor': 'val/loss', 'mode': 'min', 'every_n_train_steps': 0, 'every_n_epochs': 1, 'train_time_interval': None}.on_fit_end               	|  6.4634e-07     	|  1              	|  6.4634e-07     	|  2.2176e-09     	|
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+[[36m2025-04-11 15:27:11,808[0m][[34msrc.utils.utils[0m][[32mINFO[0m] - [rank: 0] Output dir: /home/kobayashi/dst/logs/train/runs/2025-04-11_07-21-19[0m
+[[36m2025-04-11 15:27:11,808[0m][[34msrc.utils.utils[0m][[32mINFO[0m] - [rank: 0] Metric name is None! Skipping metric value retrieval...[0m

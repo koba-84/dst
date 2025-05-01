@@ -1,0 +1,29 @@
+_target_: src.models.module.BaseModel
+
+model:
+  _target_: src.models.components.models.TRADE
+  hidden_size: 300
+  lang: ???
+  path: false
+  dropout: 0.1
+  slots: ???
+  genSample: false
+  unk_mask: true
+  teacher_forcing_ratio: 0.5
+  use_gate: true
+  nb_train_vocab: 0
+  load_emb: true
+  fix_emb: false
+  parallel_decode: true
+  
+
+optimizer:
+  _target_: torch.optim.Adam
+  _partial_: true
+  lr: 0.001
+scheduler:
+  _target_: torch.optim.lr_scheduler.ReduceLROnPlateau
+  _partial_: true
+  mode: max
+compile: false
+

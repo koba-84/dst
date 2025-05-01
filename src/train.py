@@ -6,7 +6,10 @@ import rootutils
 import torch
 from lightning import Callback, LightningDataModule, LightningModule, Trainer
 from lightning.pytorch.loggers import Logger
+from lightning.pytorch.profilers import SimpleProfiler
 from omegaconf import DictConfig
+import json
+from omegaconf import OmegaConf
 
 rootutils.setup_root(__file__, indicator=".project-root", pythonpath=True)
 # ------------------------------------------------------------------------------------ #
@@ -56,9 +59,15 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
 
     log.info(f"Instantiating datamodule <{cfg.data._target_}>")
     datamodule: LightningDataModule = hydra.utils.instantiate(cfg.data)
-
+    datamodule.setup("fit")
     log.info(f"Instantiating model <{cfg.model._target_}>")
-    model: LightningModule = hydra.utils.instantiate(cfg.model)
+    model_cfg = OmegaConf.to_container(cfg.model.model, resolve=True)
+    model_cfg["lang"] = datamodule.LANG
+    
+    model_cfg["slots"] = datamodule.SLOTS_LIST
+    model_params = OmegaConf.to_container(cfg.model, resolve=True)
+    model_params["model"] = model_cfg
+    model: LightningModule = hydra.utils.instantiate(model_params)
 
     log.info("Instantiating callbacks...")
     callbacks: List[Callback] = instantiate_callbacks(cfg.get("callbacks"))
@@ -67,7 +76,9 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     logger: List[Logger] = instantiate_loggers(cfg.get("logger"))
 
     log.info(f"Instantiating trainer <{cfg.trainer._target_}>")
-    trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
+    profiler = SimpleProfiler(dirpath="logs/profiler", filename="profiler.txt")
+
+    trainer: Trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger, profiler=profiler)
 
     object_dict = {
         "cfg": cfg,
@@ -85,7 +96,7 @@ def train(cfg: DictConfig) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     if cfg.get("train"):
         log.info("Starting training!")
         trainer.fit(model=model, datamodule=datamodule, ckpt_path=cfg.get("ckpt_path"))
-
+    
     train_metrics = trainer.callback_metrics
 
     if cfg.get("test"):
@@ -112,10 +123,10 @@ def main(cfg: DictConfig) -> Optional[float]:
     :param cfg: DictConfig configuration composed by Hydra.
     :return: Optional[float] with optimized metric value.
     """
+    print(json.dumps(cfg, indent=4, default=str))
     # apply extra utilities
     # (e.g. ask for tags if none are provided in cfg, print cfg tree, etc.)
-    extras(cfg)
-
+    torch.set_float32_matmul_precision(cfg.get("precision"))
     # train the model
     metric_dict, _ = train(cfg)
 
