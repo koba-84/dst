@@ -38,7 +38,7 @@ dependencies = [
     "multidict==6.0.5",
     "rich>=14.0.0",
     "rootutils>=1.0.7",
-    "tensorboard>=2.19.0",
+    "tensorboard>=2.20.0",
     "torch>=2.6.0",
     "wandb>=0.19.9",
 ]
