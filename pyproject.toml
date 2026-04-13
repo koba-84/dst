@@ -39,6 +39,6 @@ dependencies = [
     "rich>=14.0.0",
     "rootutils>=1.0.7",
     "tensorboard>=2.19.0",
-    "torch>=2.6.0",
+    "torch>=2.11.0",
     "wandb>=0.19.9",
 ]
